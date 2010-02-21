@@ -1,4 +1,4 @@
-// 
+//
 /*!
  * jquery.plugin.menuTree.js v0.7
  * Copyright 2010, Bill Heaton http://pixelhandler.com
@@ -15,11 +15,11 @@
 	$.fn.menuTree = function(options) {
 		// extend default options with aruments on function call
 		var opts = $.extend({}, $.fn.menuTree.defaults, options);
-		
+
 		// default options
-		$.fn.menuTree.defaults = { 
+		$.fn.menuTree.defaults = {
 			// setup animation
-			animation: false, 
+			animation: false,
 			handler: 'css',
 			speed: 'fast',
 			// setup hooks in markup
@@ -29,46 +29,47 @@
 			trace: false
 		};
 		// console.log('find: '+opts.hrefBegins); // hrefBegins undefined using 'toggle' unless called for
-		
+
 		// tree behavior only operates on anchor elements in the list that begin with a hash '#' unless options called for
 		$.fn.menuTree.mtParent = $(this);
 		$.fn.menuTree.mtTargets = $.fn.menuTree.mtParent.find("a[href^='"+opts.hrefBegins+"']");
-		
+
 		function reveal(element) {
 			var $reveal = $(element);
 			// select targets to reveal based on options we choose what list element to target default is 'ul'
 			switch(opts.listElement) {
-				case "dd": 
+				case "dd":
 					$reveal.mtReveal = $reveal.parent().next(opts.listElement);
 					break;
 				case "ol":
 					$reveal.mtReveal = $reveal.next(opts.listElement);
 					break;
-				default: 
+				default:
 					$reveal.mtReveal = $reveal.next(opts.listElement);
 			}
-			return $reveal.mtReveal; 
+			return $reveal.mtReveal;
 		}
-		
+
 		// do the magic with the click event ...
 		function clickHandler(event) {
-			var $target = $(event.target);
-			if (opts.trace) { 
+			var $target = $(event.target).closest('a', 'li');
+			if ( 0 == $target.size() ) $target = $(event.target);
+			if (opts.trace) {
 				$.fn.menuTree.msg = $target.text()+": responsive, "+$target.data('responsive')+", "+opts.handler;
-				$.fn.tracer.log($.fn.menuTree.msg); 
+				$.fn.tracer.log($.fn.menuTree.msg);
 			}
 			// if data value is not ready bail out
 			if (!$target.data('responsive')){
 				return;
 			}
 			$target.stop();
-			
+
 			// choose your animation behavior based on options passed to plugin instance
-			if (!opts.animation) { 
+			if (!opts.animation) {
 				// false uses CSS to handle effects
 				reveal($target).toggleClass('collapsed');
 				$target.toggleClass('expanded').data('state','ready').trigger('statechange');
-			} else { 
+			} else {
 				// true uses opts.handler to choose effects
 				$target.data('state','transition').trigger('statechange');
 
@@ -83,13 +84,13 @@
 							$(this).prev('.menuTree').toggleClass('expanded').data('state','ready').trigger('statechange');
 						}).toggleClass('collapsed');
 						break;
-					default: 
+					default:
 						// css only, but if called with true we should do something
 				}
 			}
 			event.preventDefault();
 		}
-		
+
 		// set up listener controller function
 		// used to prevent multiple clicks, click event is disabled during animation
 		$.fn.menuTree.controller = function(event) {
@@ -103,20 +104,20 @@
 				if ($target.next(opts.listElement).find('.expanded').length > 0) {
 					$target.next(opts.listElement).find('.expanded').each(function() {
 						$(this).removeClass('expanded').next(opts.listElement).hide().addClass('collapsed');
-						if (opts.trace) { 
+						if (opts.trace) {
 							$.fn.menuTree.msg = 'collapsed child';
-							$.fn.tracer.log($.fn.menuTree.msg); 
+							$.fn.tracer.log($.fn.menuTree.msg);
 						}
 					});
 				}
 			}
 		};
-		
+
 		// setup tree behavior and bind on controller
 		$.fn.menuTree.init = (function() {
-			
+
 			$.fn.menuTree.mtTargets.each(function() {
-			
+
 				var $localTarget = $(this);
 				$localTarget.data({
 					state: 'ready',
@@ -124,20 +125,20 @@
 				});
 				// set behavior up on all .menuTree anchors create with plugin
 				$localTarget.addClass('menuTree');
-			
+
 				// hide the child elements to reveal later // $.fn.menuTree.
 				reveal($localTarget).toggleClass('collapsed');
-			
+
 				// set Click event handler for targets
 				//$localTarget.click(clickHandler); // no event delegation
 				$.fn.menuTree.mtParent.click(clickHandler);
-			
+
 				// bind the Controller to listen for state change on
 				//$localTarget.bind('statechange',$.fn.menuTree.controller); // no event delegation
 				$.fn.menuTree.mtParent.bind('statechange',$.fn.menuTree.controller);
-				
-				// trace setup if option is called as true uses 'tracer' plugin 
-				if (opts.trace) { 
+
+				// trace setup if option is called as true uses 'tracer' plugin
+				if (opts.trace) {
 					$.fn.menuTree.msg = "option :";
 					$.fn.menuTree.msg += opts.hrefBegins;
 					$.fn.menuTree.msg += ", animation: " + opts.animation;
@@ -146,11 +147,11 @@
 					$.fn.menuTree.msg = $localTarget.text().substr(0,21) + "..." ;
 					$.fn.menuTree.msg += $localTarget.data('state') + ", responsive: ";
 					$.fn.menuTree.msg += $localTarget.data('responsive');
-					$.fn.tracer.log($.fn.menuTree.msg); 
+					$.fn.tracer.log($.fn.menuTree.msg);
 				}
 			});
 		});
-		
+
 		return $.fn.menuTree.init();
 
 	};
